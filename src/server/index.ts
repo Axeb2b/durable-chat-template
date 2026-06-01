@@ -4,7 +4,7 @@ import {
 	type WSMessage,
 	routePartykitRequest,
 } from "partyserver";
-
+import { handleAIRequest } from "./api-handler";
 import type { ChatMessage, Message } from "../shared";
 
 export class Chat extends Server<Env> {
@@ -80,6 +80,14 @@ export class Chat extends Server<Env> {
 
 export default {
 	async fetch(request, env) {
+		const url = new URL(request.url);
+
+		// Route to AI API handler
+		if (url.pathname.startsWith('/api/ai/')) {
+			return handleAIRequest(request, env);
+		}
+
+		// Route to PartyKit
 		return (
 			(await routePartykitRequest(request, { ...env })) ||
 			env.ASSETS.fetch(request)

@@ -1,8 +1,8 @@
 {
 	"name": "durable-chat-template",
-	"description": "Chat with other users in real-time using Durable Objects and PartyKit.",
+	"description": "Chat with other users in real-time using Durable Objects and PartyKit. Includes AI integration for code generation and automation.",
 	"cloudflare": {
-		"label": "Durable Chat App",
+		"label": "Durable Chat App with AI",
 		"products": [
 			"Workers",
 			"Durable Objects"
@@ -13,6 +13,7 @@
 		"publish": true
 	},
 	"dependencies": {
+		"@anthropic-ai/sdk": "^0.31.1",
 		"nanoid": "5.1.6",
 		"partyserver": "0.0.75",
 		"partysocket": "1.1.6",
