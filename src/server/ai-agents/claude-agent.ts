@@ -1,5 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk';
-
 export interface AIResponse {
 	content: string;
 	model: string;
@@ -16,7 +14,7 @@ export interface ClaudeConfig {
 }
 
 export class ClaudeAgent {
-	private client: Anthropic;
+	private apiKey: string;
 	private model: string;
 	private max_tokens: number;
 
@@ -25,7 +23,7 @@ export class ClaudeAgent {
 			throw new Error('Claude API key is required');
 		}
 
-		this.client = new Anthropic({ apiKey: config.apiKey });
+		this.apiKey = config.apiKey;
 		this.model = config.model || 'claude-3-5-sonnet-20241022';
 		this.max_tokens = config.max_tokens || 4096;
 	}
@@ -55,22 +53,42 @@ export class ClaudeAgent {
 		const selectedModel = model || this.model;
 
 		try {
-			const response = await this.client.messages.create({
-				model: selectedModel,
-				max_tokens: this.max_tokens,
-				system: system || 'You are a helpful AI assistant.',
-				messages: messages as any,
-			});
+			const response = await fetch(
+				'https://api.anthropic.com/v1/messages',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'x-api-key': this.apiKey,
+						'anthropic-version': '2023-06-01',
+					},
+					body: JSON.stringify({
+						model: selectedModel,
+						max_tokens: this.max_tokens,
+						system: system || 'You are a helpful AI assistant.',
+						messages: messages,
+					}),
+				},
+			);
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(
+					`Claude API error: ${error.error?.message || 'Unknown error'}`,
+				);
+			}
+
+			const data = await response.json();
 
 			const content =
-				response.content[0].type === 'text' ? response.content[0].text : '';
+				data.content[0]?.type === 'text' ? data.content[0].text : '';
 
 			return {
 				content,
 				model: selectedModel,
 				usage: {
-					input_tokens: response.usage.input_tokens,
-					output_tokens: response.usage.output_tokens,
+					input_tokens: data.usage?.input_tokens || 0,
+					output_tokens: data.usage?.output_tokens || 0,
 				},
 			};
 		} catch (error: any) {

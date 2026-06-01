@@ -122,6 +122,23 @@ export async function handleAIRequest(
 			return jsonResponse(result);
 		}
 
+		if (path === '/api/ai' || path === '/api/ai/') {
+			return jsonResponse({
+				message: 'AI API v1 - All endpoints available',
+				availableEndpoints: [
+					'/api/ai/generate-file',
+					'/api/ai/generate-files',
+					'/api/ai/code-review',
+					'/api/ai/bug-fix',
+					'/api/ai/refactor',
+					'/api/ai/analyze',
+					'/api/ai/tests',
+					'/api/ai/docs',
+					'/api/ai/chat',
+				],
+			});
+		}
+
 		return jsonResponse(
 			{
 				error: 'Endpoint not found',

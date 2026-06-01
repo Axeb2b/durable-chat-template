@@ -1,5 +1,3 @@
-import { Anthropic } from '@anthropic-ai/sdk';
-
 export interface AIResponse {
 	content: string;
 	model: string;
@@ -17,7 +15,7 @@ export interface OpenAIConfig {
 }
 
 export class OpenAIAgent {
-	private client: any;
+	private apiKey: string;
 	private model: string;
 	private temperature: number;
 	private max_tokens: number;
@@ -27,16 +25,7 @@ export class OpenAIAgent {
 			throw new Error('OpenAI API key is required');
 		}
 
-		try {
-			// Using fetch API for Cloudflare Workers compatibility
-			this.client = {
-				apiKey: config.apiKey,
-				baseURL: 'https://api.openai.com/v1',
-			};
-		} catch (e) {
-			console.warn('OpenAI client initialization note:', e);
-		}
-
+		this.apiKey = config.apiKey;
 		this.model = config.model || 'gpt-4';
 		this.temperature = config.temperature || 0.7;
 		this.max_tokens = config.max_tokens || 4096;
@@ -76,7 +65,7 @@ export class OpenAIAgent {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
-						Authorization: `Bearer ${this.client.apiKey}`,
+						Authorization: `Bearer ${this.apiKey}`,
 					},
 					body: JSON.stringify({
 						model: selectedModel,
